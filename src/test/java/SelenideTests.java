@@ -28,7 +28,7 @@ public class SelenideTests {
         $("[name=phone]").sendKeys("+79770000000");
         $("span[class='checkbox__box']").click();
         $$("button").find(exactText("Забронировать")).click();
-        $(byText("Успешно!")).waitUntil(visible, 15000);
+        $(byText("Успешо!")).waitUntil(visible, 15000);
     }
     @Test
     @DisplayName("Advanced ввод данных +7 дней")
@@ -47,7 +47,7 @@ public class SelenideTests {
         $("[name=phone]").sendKeys("+79770000000");
         $("span[class='checkbox__box']").click();
         $$("button").find(exactText("Забронировать")).click();
-        $(byText("Успешно!")).waitUntil(visible, 15000);
+        $(byText("Успено!")).waitUntil(visible, 15000);
     }
 
 }
