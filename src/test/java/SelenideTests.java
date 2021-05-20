@@ -1,54 +1,61 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
-import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.visible;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
+
 public class SelenideTests {
+
+    public String getPlanningDate(int days, String pattern) {
+        return LocalDate.now().plusDays(days).format(DateTimeFormatter.ofPattern(pattern));
+    }
+
+    @BeforeEach
+    void setUp() {
+        open("http://localhost:7777");
+    }
+
     @Test
     @DisplayName("Нормальный ввод данных +3 дня")
     void shouldUseCalendar() {
-        Calendar date = new GregorianCalendar();
-        date.add(Calendar.DAY_OF_MONTH, 3);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String today = dateFormat.format(date.getTime());
+        String planningDate = getPlanningDate(3, "dd.MM.yyyy");
         ///
-        open("http://localhost:7777");
         $("[placeholder='Город']").sendKeys("Москва");
-        $("[placeholder='Дата встречи']").doubleClick().sendKeys(Keys.CLEAR);
-        $("[placeholder='Дата встречи']").setValue(today);
+        $("[placeholder='Дата встречи']").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[placeholder='Дата встречи']").setValue(planningDate);
         $("[name=name]").sendKeys("Якимов Дмитрий");
         $("[name=phone]").sendKeys("+79770000000");
-        $("span[class='checkbox__box']").click();
+        $(".checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
-        $(byText("Успешно!")).waitUntil(visible, 15000);
+        $(".notification__content").waitUntil(visible, 15000)
+                .shouldHave(exactText("Встреча успешно забронирована на " + planningDate));
     }
 
     @Test
     @DisplayName("Advanced ввод данных +7 дней")
     void shouldUseCalendarAdvanced() {
-        Calendar date = new GregorianCalendar();
-        date.add(Calendar.DAY_OF_MONTH, 7);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
-        String today = dateFormat.format(date.getTime());
+        String planningDate = getPlanningDate(7, "dd");
+        String planningDateWithFullPattern = getPlanningDate(7, "dd.MM.yyyy");
         ///
-        open("http://localhost:7777");
         $("[placeholder='Город']").sendKeys("Мо");
-        $("div[class='popup popup_direction_bottom-left popup_target_anchor popup_size_m popup_visible popup_height_adaptive popup_theme_alfa-on-white input__popup']").find(byText("Москва")).click();
-        $("span[class='icon icon_size_m icon_name_calendar icon_theme_alfa-on-white']").click();
-        $("table[class='calendar__layout']").find(byText(today)).click();
+        $$(".menu-item__control").findBy(text("Москва")).click();
+        $("[placeholder='Дата встречи']").click();
+//        $("div[data-step='1']").click(); Кнопка смены месяца
+        $("table[class='calendar__layout']").find(byText(planningDate)).click();
         $("[name=name]").sendKeys("Якимов Дмитрий");
         $("[name=phone]").sendKeys("+79770000000");
-        $("span[class='checkbox__box']").click();
+        $(".checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
-        $(byText("Успешно!")).waitUntil(visible, 15000);
+        $(".notification__content").waitUntil(visible, 15000)
+                .shouldHave(exactText("Встреча успешно забронирована на " + planningDateWithFullPattern));
     }
 
 }
